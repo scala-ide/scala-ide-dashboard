@@ -1,0 +1,18 @@
+.project {
+	display: inline-block;
+	border: solid 1px;
+	vertical-align: top;
+	padding: 0.25em;
+}
+
+.project-name {
+	font-weight: bold;
+}
+
+#pr-total {
+	margin-bottom: 1em;
+}
+
+#title img {
+	margin-right: 2em;
+}
