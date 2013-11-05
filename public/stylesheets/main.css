@@ -1,18 +1,126 @@
+body {
+	background-color: #BBBBBB;
+	font-family: sans-serif;
+}
+
+.nb {
+	font-weight: bold;
+	float: right;
+}
+
+.pr {
+	background: #CCCCCC;
+	border: solid 1px #BBBBBB;
+	padding: 0 0.25em;
+	text-decoration: none;
+	font-family: serif;
+}
+
 .project {
 	display: inline-block;
 	border: solid 1px;
 	vertical-align: top;
 	padding: 0.25em;
+	margin: 0.25em;
+}
+
+.project .label {
+	font-size: 0.8em;
+	vertical-align: bottom;
+  color: #444444;
 }
 
 .project-name {
 	font-weight: bold;
 }
 
-#pr-total {
-	margin-bottom: 1em;
+.project-name a {
+	text-decoration: none;
 }
 
-#title img {
+#logo {
 	margin-right: 2em;
+	height: 70px;
+}
+
+#summary {
+	display: inline-block;
+  background-color: #DDDDDD;
+  border: solid 1px #CCCCCC;
+  vertical-align: top;
+	padding: 0.25em;
+}
+
+#summary .label {
+	float: left;
+	margin-right: 1ex;
+}
+
+#top {
+	margin-bottom: 1em;	
+}
+
+#scala-ide_scala-ide {
+  background: #CC8888;
+  border-color: #BB8888;
+}
+
+#scala-ide_scala-search {
+  background: #CC8888;
+  border-color: #BB8888;
+}
+
+#scala-ide_scala-worksheet {
+  background: #CC8888;
+  border-color: #BB8888;
+}
+
+#scala-ide_scala-ide-play2 {
+  background: #CC8888;
+  border-color: #BB8888;
+}
+
+#scala-ide_sbt-integration {
+  background: #CC8888;
+  border-color: #BB8888;
+}
+
+#scala-ide_docs {
+  background: #88CC88;
+  border-color: #88BB88;
+}
+
+#scala-ide_docs {
+  background: #88CC88;
+  border-color: #88BB88;
+}
+
+#scala-ide_scala-ide-github-com {
+  background: #88CC88;
+  border-color: #88BB88;
+}
+
+#scala-ide_scala-ide-dashboard {
+  background: #8888CC;
+  border-color: #8888BB;
+}
+
+#scala-ide_plugin-profiles {
+  background: #8888CC;
+  border-color: #8888BB;
+}
+
+#scala-ide_uber-build {
+  background: #8888CC;
+  border-color: #8888BB;
+}
+
+#scala-ide_ecosystem {
+  background: #8888CC;
+  border-color: #8888BB;
+}
+
+#scala-ide_build-tools {
+  background: #8888CC;
+  border-color: #8888BB;
 }

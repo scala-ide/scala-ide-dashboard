@@ -1,20 +1,30 @@
 @(projects: Seq[(model.Project, Seq[model.PullRequest])])
 
+@import views.HtmlSupport._
+
 @main {
 
-  <div id="title"><h1><img alt="Scala IDE logo" src="@routes.Assets.at("images/scala-ide-logo.png")">Dashboard</h1></div>
-  
-  <div id="pr-total"># of PRs: @{projects.map(_._2.size).sum}</div>
-    
-  <div id="projects">
-  @for(project <- projects) {
-    <div class="project">
-      <div class="project-name"><a href="https://github.com/@project._1.githubRepo">@project._1.name</a></div>
-      @for(pr <- project._2) {
-        <div class="pr_link"><a href="@pr.url">@pr.number</a></div>
-      }
+  <div id="top">
+    <img id="logo" alt="Scala IDE logo" src="@routes.Assets.at("images/scala-ide-logo-transparent-black.png")">
+    <div id="summary">
+      <div id="project-nb" class="summary-item"><span class="label"># of projects: </span><span class="nb">@{projects.length}</span></div>
+      <div id="open-pr-nb" class="summary-item"><span class="label"># of open PRs: </span><span class="nb">@{projects.map(_._2.size).sum}</span></div>
     </div>
-  }
+  </div>
+  
+  <div id="projects">
+  @for(project <- projects) {<div class="project" id="@{cssIdFor(project._1)}">
+      <div class="project-name"><a href="https://github.com/@project._1.githubRepo" target="_blank">@project._1.name</a></div>
+      <div class="project-pr"><span class="label">open PRs:</span>
+      @if(project._2.isEmpty) {
+        -
+      } else {
+	      @for(pr <- project._2.sortBy(_.number)) {
+	        <a class="pr" href="@pr.url" target="_blank">@pr.number</a>
+	      }
+      }
+      </div>
+    </div>}
   </div>
 
 }
