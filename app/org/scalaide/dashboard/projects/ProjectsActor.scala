@@ -11,25 +11,21 @@ import akka.actor.ActorIdentity
 import akka.actor.Identify
 import akka.actor.ActorIdentity
 
-class ProjectsActor extends Actor {
+class ProjectsActor(dataProcessor: ActorRef) extends Actor {
   
   import ProjectsActor._
   
   var projects: List[Project] = Nil
-  var dataProcessor: ActorRef = null
   
   def receive = initialization
   
   val initialization: Receive = LoggingReceive {
     case Initialize =>
-      context.actorSelection("/user/dataprocessor") ! Identify(SomeId)
-    case ActorIdentity(SomeId, Some(dpa)) =>
-      dataProcessor = dpa
       dataProcessor ! DataProcessorActor.FetchAllProjects
     case Projects(ps) =>
       projects = ps
       context.become(processing)
-      context.system.scheduler.scheduleOnce(60 second, dataProcessor, DataProcessorActor.FetchAllProjects)
+      context.system.scheduler.scheduleOnce(60.second, dataProcessor, DataProcessorActor.FetchAllProjects)
     case GetProjects =>
       sender ! InitializationInProgress
   }
@@ -37,7 +33,7 @@ class ProjectsActor extends Actor {
   def processing: Receive = LoggingReceive {
     case Projects(ps) =>
       projects = ps
-      context.system.scheduler.scheduleOnce(60 second, dataProcessor, DataProcessorActor.FetchAllProjects)
+      context.system.scheduler.scheduleOnce(60.second, dataProcessor, DataProcessorActor.FetchAllProjects)
     case GetProjects =>
       sender ! Projects(projects)
   }
@@ -50,7 +46,7 @@ class ProjectsActor extends Actor {
 }
 
 object ProjectsActor {
-  def props = Props[ProjectsActor]
+  def props(dataProcessor: ActorRef) = Props(classOf[ProjectsActor], dataProcessor)
   
   val SomeId = "id-1"
   
@@ -58,6 +54,6 @@ object ProjectsActor {
   private case object Initialize
   case object InitializationInProgress
   case object GetProjects
-  // may need a different message for projects coming from DataProcessor, with some acces control 
+  // may need a different message for projects coming from DataProcessor, with some access control 
   case class Projects(projects: List[Project])
 }

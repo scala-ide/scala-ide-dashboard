@@ -6,6 +6,7 @@ import akka.actor.ActorSystem
 import play.libs.Akka
 import org.scalaide.dashboard.projects.ProjectsActor
 import org.scalaide.dashboard.projects.DataProcessorActor
+import org.scalaide.dashboard.users.UsersActor
 
 object Global extends GlobalSettings {
   
@@ -15,8 +16,9 @@ object Global extends GlobalSettings {
   
   private def initializeActors() {
     val system = Akka.system()
-    system.actorOf(DataProcessorActor.props, "dataprocessor")
-    system.actorOf(ProjectsActor.props, "projects")
+    val dataProcessor = system.actorOf(DataProcessorActor.props, "dataprocessor")
+    val projects = system.actorOf(ProjectsActor.props(dataProcessor), "projects")
+    val actors = system.actorOf(UsersActor.props(projects), "users")
   }
 
 }

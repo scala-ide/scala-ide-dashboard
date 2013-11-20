@@ -8,7 +8,6 @@ import akka.actor.Props
 import akka.actor.actorRef2Scala
 import model.Project
 import model.PullRequest
-import model.PullRequestReader.pullRequestReads
 import play.Play
 import play.api.libs.ws.WS
 import akka.event.LoggingReceive
@@ -46,7 +45,7 @@ object DataProcessorActor {
   def fetchAllProjects(sender: ActorRef) {
     val f = Future.traverse(Project.allProjects) { p =>
       WS.url(BaseGitHubURL + RepoAPI + p.githubRepo + PullRequestCommand + AccessTokenParam).get().map { response =>
-        import model.PullRequestReader._
+        import model.GitHubJsonReaders._
 
         val pullRequestsa = (response.json).validate[List[PullRequest]]
         val prs = pullRequestsa.recover {
@@ -54,7 +53,7 @@ object DataProcessorActor {
             println(a)
             Nil
         }.get
-        p.copy()(pullRequests = prs)
+        p.copy(pullRequests = prs)
       }
     }
 
