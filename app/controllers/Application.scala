@@ -40,7 +40,10 @@ object Application extends Controller {
         val in = Iteratee.foreach[JsValue] {
           msg =>
             a ! UserActor.FromClient(msg)
+        }.map { _ =>
+          a ! UserActor.ClientConnectionLost
         }
+        
         (in, out)
     }
 

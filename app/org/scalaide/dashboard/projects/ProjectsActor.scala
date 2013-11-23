@@ -17,6 +17,8 @@ class ProjectsActor(dataProcessor: ActorRef) extends Actor {
   
   var projects: List[Project] = Nil
   
+  var subscribers = Set[ActorRef]()
+  
   def receive = initialization
   
   val initialization: Receive = LoggingReceive {
@@ -24,10 +26,17 @@ class ProjectsActor(dataProcessor: ActorRef) extends Actor {
       dataProcessor ! DataProcessorActor.FetchAllProjects
     case Projects(ps) =>
       projects = ps
+      subscribers.foreach {s =>
+        s ! Projects(ps)
+      }
       context.become(processing)
       context.system.scheduler.scheduleOnce(60.second, dataProcessor, DataProcessorActor.FetchAllProjects)
     case GetProjects =>
       sender ! InitializationInProgress
+    case SubscribeAndGetAll =>
+      subscribers += sender
+    case Unsubscribe =>
+      subscribers -= sender
   }
   
   def processing: Receive = LoggingReceive {
@@ -36,6 +45,12 @@ class ProjectsActor(dataProcessor: ActorRef) extends Actor {
       context.system.scheduler.scheduleOnce(60.second, dataProcessor, DataProcessorActor.FetchAllProjects)
     case GetProjects =>
       sender ! Projects(projects)
+      // TODO: create delta and push to subscribers
+    case SubscribeAndGetAll =>
+      subscribers += sender
+      sender ! Projects(projects)
+    case Unsubscribe =>
+      subscribers -= sender
   }
   
   override def preStart() {
@@ -56,4 +71,6 @@ object ProjectsActor {
   case object GetProjects
   // may need a different message for projects coming from DataProcessor, with some access control 
   case class Projects(projects: List[Project])
+  case object SubscribeAndGetAll
+  case object Unsubscribe
 }

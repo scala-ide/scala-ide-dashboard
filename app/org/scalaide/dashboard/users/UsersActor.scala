@@ -11,6 +11,7 @@ import play.api.libs.json.JsString
 import org.scalaide.dashboard.projects.ProjectsActor
 import play.api.libs.json.Json
 import play.api.libs.json.JsObject
+import akka.actor.PoisonPill
 
 class UsersActor(projects: ActorRef) extends Actor {
 
@@ -38,18 +39,22 @@ class UserActor(channel: Concurrent.Channel[JsValue], projects: ActorRef) extend
 
   override def receive = LoggingReceive {
     case FromClient(json: JsValue) =>
-      projects ! ProjectsActor.GetProjects
+      projects ! ProjectsActor.SubscribeAndGetAll
     case ProjectsActor.Projects(ps) =>
       ps.foreach { p =>
         import model.WebAppJsonWriters._
         channel.push(Json.obj("project" -> Json.toJson(p)))
       }
+    case ClientConnectionLost =>
+      projects ! ProjectsActor.Unsubscribe
+      self ! PoisonPill
   }
 
 }
 
 object UserActor {
   case class FromClient(j: JsValue)
+  case object ClientConnectionLost
 
   def props(channel: Concurrent.Channel[JsValue], projects: ActorRef) = Props(classOf[UserActor], channel, projects)
 }
