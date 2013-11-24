@@ -14,27 +14,7 @@
 
   <div id="projects">
   </div>
-
-  <script type="text/javascript">
-
-    function message(msg) {
-      $('#projects').append("<p>" + msg + "</p>")
-    }
-
-    var socket = new WebSocket("ws://localhost:9000/ws");
-
-    socket.onopen = function() {
-    	var message= {
-    			"action":"go"};
-        socket.send(JSON.stringify(message));
-    }
-
-    socket.onmessage = function(event) {
-        var msg = JSON.parse(event.data)
-        console.log("received message " + msg);
-        message(event.data);
-    }
-
-  </script>
+  
+  <script type="text/javascript" src="@routes.Assets.at("javascripts/projects.js")"></script>
 
 }

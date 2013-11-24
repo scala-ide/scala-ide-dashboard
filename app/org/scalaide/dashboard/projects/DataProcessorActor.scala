@@ -53,7 +53,7 @@ object DataProcessorActor {
             println(a)
             Nil
         }.get
-        p.copy(pullRequests = prs)
+        p.copy(pullRequests = prs.sortBy(_.number))
       }
     }
 
