@@ -5,7 +5,8 @@ version := "1.0-SNAPSHOT"
 libraryDependencies ++= Seq(
   jdbc,
   anorm,
-  cache
+  cache,
+  "org.scalatest" %% "scalatest" % "2.0" % "test"
 )     
 
 play.Project.playScalaSettings

@@ -12,65 +12,66 @@ import akka.actor.Identify
 import akka.actor.ActorIdentity
 
 class ProjectsActor(dataProcessor: ActorRef) extends Actor {
-  
+
   import ProjectsActor._
-  
+
   var projects: List[Project] = Nil
-  
+
   var subscribers = Set[ActorRef]()
-  
+
   def receive = initialization
-  
+
   val initialization: Receive = LoggingReceive {
     case Initialize =>
       dataProcessor ! DataProcessorActor.FetchAllProjects
     case Projects(ps) =>
       projects = ps
-      subscribers.foreach {s =>
+      subscribers.foreach { s =>
         s ! Projects(ps)
       }
       context.become(processing)
       context.system.scheduler.scheduleOnce(60.second, dataProcessor, DataProcessorActor.FetchAllProjects)
-    case GetProjects =>
-      sender ! InitializationInProgress
     case SubscribeAndGetAll =>
       subscribers += sender
     case Unsubscribe =>
       subscribers -= sender
   }
-  
-  def processing: Receive = LoggingReceive {
+
+  val processing: Receive = LoggingReceive {
     case Projects(ps) =>
+      val delta = Project.delta(projects, ps)
       projects = ps
+
+      for {
+        s <- subscribers
+        p <- delta
+      } s ! ModifiedProject(p)
+
       context.system.scheduler.scheduleOnce(60.second, dataProcessor, DataProcessorActor.FetchAllProjects)
-    case GetProjects =>
-      sender ! Projects(projects)
-      // TODO: create delta and push to subscribers
     case SubscribeAndGetAll =>
       subscribers += sender
       sender ! Projects(projects)
     case Unsubscribe =>
       subscribers -= sender
   }
-  
+
   override def preStart() {
     self ! Initialize
   }
-  
 
 }
 
 object ProjectsActor {
   def props(dataProcessor: ActorRef) = Props(classOf[ProjectsActor], dataProcessor)
-  
+
   val SomeId = "id-1"
-  
+
   // messages
   private case object Initialize
   case object InitializationInProgress
-  case object GetProjects
   // may need a different message for projects coming from DataProcessor, with some access control 
   case class Projects(projects: List[Project])
+  case class ModifiedProject(project: Project)
   case object SubscribeAndGetAll
   case object Unsubscribe
 }

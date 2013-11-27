@@ -10,11 +10,14 @@ function createPullRequestDom(pullRequest) {
 	return nPullRequest;
 }
 
+function projectId(project) {
+	return project.githubRepo.replace("/", "_");
+}
+
 function createProjectDom(project) {
-	var projectId = project.githubRepo.replace("/", "_");
 
 	var nProject = document.createElement("div");
-	nProject.id = projectId;
+	nProject.id = projectId(project);
 	nProject.className = "project"
 
 	var nName = document.createElement("div");
@@ -41,7 +44,7 @@ function createProjectDom(project) {
 	if (prs.length == 0) {
 		nPR.appendChild(document.createTextNode(" -"));
 	} else {
-		for (var i = 0; i < prs.length; i++) {
+		for ( var i = 0; i < prs.length; i++) {
 			nPR.appendChild(createPullRequestDom(prs[i]));
 		}
 	}
@@ -52,7 +55,7 @@ function createProjectDom(project) {
 function updateStats() {
 	var nbPRs = 0;
 
-	for (var i = 0; i < knownProjects.length; i++) {
+	for ( var i = 0; i < knownProjects.length; i++) {
 		nbPRs += knownProjects[i].pullRequests.length;
 	}
 
@@ -63,24 +66,54 @@ function updateStats() {
 function message(msgText) {
 	var msg = JSON.parse(msgText);
 
+	var projectIndex = -1;
+	var pId = projectId(msg.project)
+	for ( var i = 0; i < knownProjects.length; i++) {
+		if (pId == projectId(knownProjects[i])) {
+			projectIndex = i;
+			break;
+		}
+	}
+
 	var projects = document.getElementById("projects");
 
-	knownProjects[knownProjects.length] = msg.project;
-
-	projects.appendChild(createProjectDom(msg.project));
+	if (projectIndex == -1) {
+		knownProjects[knownProjects.length] = msg.project;
+		projects.appendChild(createProjectDom(msg.project));
+	} else {
+		var oldNode = document.getElementById(pId);
+		projects.replaceChild(createProjectDom(msg.project), oldNode);
+		knownProjects[projectIndex] = msg.project;
+	}
 
 	updateStats();
 }
 
-var socket = new WebSocket("ws://localhost:9000/ws");
+function createWebSocket() {
 
-socket.onopen = function() {
-	var message = {
-		"action" : "go"
-	};
-	socket.send(JSON.stringify(message));
+	var socket = new WebSocket("ws://localhost:9000/ws");
+
+	socket.onopen = function() {
+		console.log("web socket open");
+		var message = {
+			"action" : "go"
+		};
+		socket.send(JSON.stringify(message));
+	}
+
+	socket.onmessage = function(event) {
+		message(event.data);
+	}
+
+	socket.onclose = function() {
+		console.log("web socket closed");
+		setTimeout(createWebSocket, 1000);
+	}
+
+	socket.onError = function() {
+		console.log("web socket error");
+		setTimeout(createWebSocket, 1000);
+	}
 }
 
-socket.onmessage = function(event) {
-	message(event.data);
-}
+createWebSocket();

@@ -12,6 +12,7 @@ import org.scalaide.dashboard.projects.ProjectsActor
 import play.api.libs.json.Json
 import play.api.libs.json.JsObject
 import akka.actor.PoisonPill
+import model.Project
 
 class UsersActor(projects: ActorRef) extends Actor {
 
@@ -41,13 +42,21 @@ class UserActor(channel: Concurrent.Channel[JsValue], projects: ActorRef) extend
     case FromClient(json: JsValue) =>
       projects ! ProjectsActor.SubscribeAndGetAll
     case ProjectsActor.Projects(ps) =>
-      ps.foreach { p =>
-        import model.WebAppJsonWriters._
-        channel.push(Json.obj("project" -> Json.toJson(p)))
-      }
+      ps.foreach(push)
+    case ProjectsActor.ModifiedProject(p) =>
+      push(p)
     case ClientConnectionLost =>
       projects ! ProjectsActor.Unsubscribe
       self ! PoisonPill
+  }
+
+  private def push(project: Project) {
+    import model.WebAppJsonWriters._
+    channel.push(Json.obj("project" -> Json.toJson(project)))
+  }
+
+  override def postStop() {
+    channel.eofAndEnd()
   }
 
 }
