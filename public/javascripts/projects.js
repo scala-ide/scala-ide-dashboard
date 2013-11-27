@@ -91,7 +91,8 @@ function message(msgText) {
 
 function createWebSocket() {
 
-	var socket = new WebSocket("ws://localhost:9000/ws");
+	var socket = new WebSocket("ws://" + location.hostname + ":"
+			+ location.port + "/ws");
 
 	socket.onopen = function() {
 		console.log("web socket open");
