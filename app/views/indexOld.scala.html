@@ -1,0 +1,30 @@
+@(projects: List[model.Project])
+
+@import views.HtmlSupport._
+
+@main {
+
+  <div id="top">
+    <img id="logo" alt="Scala IDE logo" src="@routes.Assets.at("images/scala-ide-logo-transparent-black.png")">
+    <div id="summary">
+      <div id="project-nb" class="summary-item"><span class="label"># of projects: </span><span class="nb">@{projects.length}</span></div>
+      <div id="open-pr-nb" class="summary-item"><span class="label"># of open PRs: </span><span class="nb">@{projects.map(_.pullRequests.size).sum}</span></div>
+    </div>
+  </div>
+  
+  <div id="projects">
+  @for(project <- projects) {<div class="project" id="@{cssIdFor(project)}">
+      <div class="project-name"><a href="https://github.com/@project.githubRepo">@project.name</a></div>
+      <div class="project-pr"><span class="label">open PRs:</span>
+      @if(project.pullRequests.isEmpty) {
+        -
+      } else {
+	      @for(pr <- project.pullRequests.sortBy(_.number)) {
+	        <a class="pr" href="@pr.url">@pr.number</a>
+	      }
+      }
+      </div>
+    </div>}
+  </div>
+
+}

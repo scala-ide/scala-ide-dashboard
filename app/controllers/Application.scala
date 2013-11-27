@@ -4,48 +4,49 @@ import play.api._
 import play.api.mvc._
 import play.api.libs.ws.WS
 import scala.concurrent.Future
+import scala.concurrent.duration._
 import model.PullRequest
 import model.Project
 import play.Play
+import play.libs.Akka
+import akka.pattern.ask
+import org.scalaide.dashboard.projects.ProjectsActor
+import akka.util.Timeout
+import scala.concurrent.ExecutionContext.Implicits.global
+import play.api.libs.json.JsValue
+import org.scalaide.dashboard.users.UsersActor
+import play.api.libs.iteratee.Concurrent
+import play.api.libs.iteratee.Iteratee
+import org.scalaide.dashboard.users.UserActor
 
 object Application extends Controller {
 
-  private val OAuthToken = Play.application().configuration().getString("dashboard.oauthtoken")
-
-  private val BaseGitHubURL = "https://api.github.com/"
-  private val RepoAPI = "repos/"
-
-  private val repo = "scala-ide/scala-ide"
-
-  private val PullRequestCommand = "/pulls?"
-
-  private val AccessTokenParam = s"access_token=$OAuthToken"
-
-  implicit val context = scala.concurrent.ExecutionContext.Implicits.global
-
-  def index = Action.async {
-
-    getData.map { pullRequests =>
-      Ok(views.html.index(pullRequests))
-    }
-
+  def index = Action { request =>
+    Ok(views.html.index())
   }
 
-  private def getData(): Future[Seq[(Project, Seq[PullRequest])]] = {
-    val fs = Project.allProjects.map { p =>
-      WS.url(BaseGitHubURL + RepoAPI + p.githubRepo + PullRequestCommand + AccessTokenParam).get().map { response =>
-        import model.PullRequestReader._
+  def ws = WebSocket.async[JsValue] { request =>
+    val system = Akka.system()
 
-        val pullRequests = (response.json).validate[Seq[PullRequest]]
-        val prs = pullRequests.recover {
-          case a =>
-            println(a)
-            Nil
-        }.get
-        (p, prs)
-      }
+    val usersActor = system.actorSelection("user/users")
+
+    implicit val timeout = Timeout(5.seconds)
+
+    val (out, channel) = Concurrent.broadcast[JsValue]
+    val newUser = usersActor ? UsersActor.NewUser(channel)
+
+    newUser collect {
+      case UsersActor.User(a) =>
+        val in = Iteratee.foreach[JsValue] {
+          msg =>
+            a ! UserActor.FromClient(msg)
+        }.map { _ =>
+          a ! UserActor.ClientConnectionLost
+        }
+        
+        (in, out)
     }
-    Future.sequence(fs)
+
   }
 
 }
