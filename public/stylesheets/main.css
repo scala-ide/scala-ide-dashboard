@@ -14,6 +14,7 @@ body {
 	padding: 0 0.25em;
 	text-decoration: none;
 	font-family: serif;
+	margin: 0 0.1em;
 }
 
 .project {
@@ -60,67 +61,17 @@ body {
 	margin-bottom: 1em;	
 }
 
-#scala-ide_scala-ide {
+.project-cat-product {
   background: #CC8888;
   border-color: #BB8888;
 }
 
-#scala-ide_scala-search {
-  background: #CC8888;
-  border-color: #BB8888;
-}
-
-#scala-ide_scala-worksheet {
-  background: #CC8888;
-  border-color: #BB8888;
-}
-
-#scala-ide_scala-ide-play2 {
-  background: #CC8888;
-  border-color: #BB8888;
-}
-
-#scala-ide_sbt-integration {
-  background: #CC8888;
-  border-color: #BB8888;
-}
-
-#scala-ide_docs {
+.project-cat-documentation {
   background: #88CC88;
   border-color: #88BB88;
 }
 
-#scala-ide_docs {
-  background: #88CC88;
-  border-color: #88BB88;
-}
-
-#scala-ide_scala-ide-github-com {
-  background: #88CC88;
-  border-color: #88BB88;
-}
-
-#scala-ide_scala-ide-dashboard {
-  background: #8888CC;
-  border-color: #8888BB;
-}
-
-#scala-ide_plugin-profiles {
-  background: #8888CC;
-  border-color: #8888BB;
-}
-
-#scala-ide_uber-build {
-  background: #8888CC;
-  border-color: #8888BB;
-}
-
-#scala-ide_ecosystem {
-  background: #8888CC;
-  border-color: #8888BB;
-}
-
-#scala-ide_build-tools {
+.project-cat-support {
   background: #8888CC;
   border-color: #8888BB;
 }

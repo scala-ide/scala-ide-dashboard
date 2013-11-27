@@ -11,14 +11,14 @@ function createPullRequestDom(pullRequest) {
 }
 
 function projectId(project) {
-	return project.githubRepo.replace("/", "_");
+	return project.githubRepo.replace("/", "_").replace(".", "-");
 }
 
 function createProjectDom(project) {
 
 	var nProject = document.createElement("div");
 	nProject.id = projectId(project);
-	nProject.className = "project"
+	nProject.className = "project project-cat-" + project.category
 
 	var nName = document.createElement("div");
 	nName.className = "project-name";

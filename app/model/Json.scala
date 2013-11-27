@@ -28,6 +28,7 @@ object WebAppJsonWriters {
 
   implicit def projectWrites: Writes[Project] = (
     (__ \ "name").write[String] and
+    (__ \ "category").write[String] and
     (__ \ "githubRepo").write[String] and
     (__ \ "pullRequests").lazyWrite(list[PullRequest](pullRequestWrites)))(unlift(Project.unapply))
 }

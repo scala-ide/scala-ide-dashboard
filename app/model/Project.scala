@@ -14,7 +14,7 @@ object Project {
 
     conf.getConfigList("projects").asScala.map {
       pConf: Config =>
-        Project(pConf.getString("name"), pConf.getString("github_repo"))
+        Project(pConf.getString("name"), pConf.getString("category"), pConf.getString("github_repo"))
     }(collection.breakOut)
 
   }
@@ -25,6 +25,6 @@ object Project {
   }
 }
 
-case class Project(name: String, githubRepo: String, val pullRequests: List[PullRequest] = Nil) {
+case class Project(name: String, category: String, githubRepo: String, val pullRequests: List[PullRequest] = Nil) {
 
 }
