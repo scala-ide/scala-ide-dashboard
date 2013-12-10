@@ -25,3 +25,30 @@ To create an OAuth token, go to your [settings/applications page](https://github
 ```bash
 sbt -Ddashboard.oauthtoken=<oauth_token>
 ```
+
+Deployment on Heroku
+-------------------
+
+The GitHub OAuth is references in the Heroku config file as `GH_OAUTH_TOKEN`. The variable is set using:
+
+```bash
+heroku config:set GH_OAUTH_TOKEN=<oauth_token>
+```
+
+Support for websockets on Heroku is still experimental. It needs to be enabled with:
+
+```bash
+heroku labs:enable websockets
+```
+
+Otherwise, it is a normal Play application on Heroku.
+
+Deployment for a different team
+-------------------------------
+
+The main configuration file is `conf/projects.conf`. It contains the list of projects to display.
+
+There are 3 categories supported by default: `product`, `documentation` and `support`. More can be used, and a css configuration created for them.
+
+The other UI elements (logo, page title...) need to be changed in the templates.
+
