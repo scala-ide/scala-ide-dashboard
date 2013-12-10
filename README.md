@@ -29,7 +29,7 @@ sbt -Ddashboard.oauthtoken=<oauth_token>
 Deployment on Heroku
 -------------------
 
-The GitHub OAuth is references in the Heroku config file as `GH_OAUTH_TOKEN`. The variable is set using:
+The GitHub OAuth is referenced in the Heroku config file as `GH_OAUTH_TOKEN`. The variable is set using:
 
 ```bash
 heroku config:set GH_OAUTH_TOKEN=<oauth_token>
