@@ -10,6 +10,15 @@ function createPullRequestDom(pullRequest) {
 	return nPullRequest;
 }
 
+function createIssueDom(issue) {
+	var nPullRequest = document.createElement("a");
+	nPullRequest.className = "pr";
+	nPullRequest.target = "_blank"
+	nPullRequest.href = issue.url
+	nPullRequest.appendChild(document.createTextNode(issue.number))
+	return nPullRequest;
+}
+
 function projectId(project) {
 	return project.githubRepo.replace("/", "_").replace(".", "-");
 }
@@ -46,6 +55,25 @@ function createProjectDom(project) {
 	} else {
 		for ( var i = 0; i < prs.length; i++) {
 			nPR.appendChild(createPullRequestDom(prs[i]));
+		}
+	}
+	
+	var nPI = document.createElement("div");
+	nPI.className = "project-pr";
+	nProject.appendChild(nPI);
+	
+	var nPRIssue = document.createElement("span");
+	nPRIssue.className = "label";
+	nPRIssue.appendChild(document.createTextNode("unlabeled Issues:"))
+	nPI.appendChild(nPRIssue);
+
+	var issues = project.issues;
+
+	if (issues.length == 0) {
+		nPI.appendChild(document.createTextNode(" -"));
+	} else {
+		for ( var i = 0; i < issues.length; i++) {
+			nPI.appendChild(createIssueDom(issues[i]));
 		}
 	}
 

@@ -10,7 +10,18 @@ object GitHubJsonReaders {
   implicit def pullRequestReads: Reads[PullRequest] = (
     (__ \ "number").read[Int] and
     (__ \ "html_url").read[String] and
-    (__ \ "_links" \ "comments" \ "href").read[String])(PullRequest)
+    (__ \ "_links" \ "comments" \ "href").read[String]).apply(PullRequest)
+
+
+  implicit def labelReads: Reads[Label] = (
+    (__ \ "name").read[String] and
+    (__ \ "color").read[String]) apply (Label)
+
+  implicit def issueReads: Reads[Issue] = (
+    (__ \ "number").read[Int] and
+    (__ \ "url").read[String] and
+    (__ \ "labels").read[Seq[Label]] and
+    (__ \ "comments").read[Int]).apply(Issue)
 
 }
 
@@ -25,10 +36,19 @@ object WebAppJsonWriters {
         "url" -> pr.url)
     }
   }
+  
+  implicit def issueWrites = new Writes[Issue] {
+    def writes(i: Issue): JsValue = {
+      Json.obj(
+        "number" -> i.number,
+        "url" -> i.url)
+    }
+  }
 
   implicit def projectWrites: Writes[Project] = (
     (__ \ "name").write[String] and
     (__ \ "category").write[String] and
     (__ \ "githubRepo").write[String] and
-    (__ \ "pullRequests").lazyWrite(list[PullRequest](pullRequestWrites)))(unlift(Project.unapply))
+    (__ \ "pullRequests").lazyWrite(list[PullRequest](pullRequestWrites)) and
+    (__ \ "issues").lazyWrite(list[Issue](issueWrites)))(unlift(Project.unapply))
 }

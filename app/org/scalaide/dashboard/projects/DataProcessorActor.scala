@@ -39,22 +39,41 @@ object DataProcessorActor {
   private val RepoAPI = "repos/"
 
   private val PullRequestCommand = "/pulls?"
+  private val IssuesRequestCommand = "/issues?"
 
   private val AccessTokenParam = s"access_token=$OAuthToken"
 
+  private def fetchProjectPullRequests(p: model.Project): Future[List[model.PullRequest]] = {
+    WS.url(BaseGitHubURL + RepoAPI + p.githubRepo + PullRequestCommand + AccessTokenParam).get().map { response =>
+      import model.GitHubJsonReaders._
+      val pullRequestsa = (response.json).validate[List[PullRequest]]
+      pullRequestsa.recover {
+        case a =>
+          println(a)
+          Nil
+      }.get
+    }
+  }
+  private def fetchProjectIssues(p: model.Project): Future[List[model.Issue]] = {
+    WS.url(BaseGitHubURL + RepoAPI + p.githubRepo + IssuesRequestCommand + AccessTokenParam).get().map { response =>
+      import model.GitHubJsonReaders._
+      val issuesA = (response.json).validate[List[model.Issue]]
+      issuesA.recover {
+        case a =>
+          println(a)
+          Nil
+      }.get.filter(_.labels.isEmpty)  // TODO - Filter here or later?
+    }
+  }
+  
   def fetchAllProjects(sender: ActorRef) {
     val f = Future.traverse(Project.allProjects) { p =>
-      WS.url(BaseGitHubURL + RepoAPI + p.githubRepo + PullRequestCommand + AccessTokenParam).get().map { response =>
-        import model.GitHubJsonReaders._
-
-        val pullRequestsa = (response.json).validate[List[PullRequest]]
-        val prs = pullRequestsa.recover {
-          case a =>
-            println(a)
-            Nil
-        }.get
-        p.copy(pullRequests = prs.sortBy(_.number))
-      }
+      val pulls = fetchProjectPullRequests(p)
+      val issues = fetchProjectIssues(p)
+      for {
+        ps <- pulls
+        is <- issues
+      } yield p.copy(pullRequests = ps.sortBy(_.number), issues = is)
     }
 
     f.map {
