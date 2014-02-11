@@ -25,6 +25,6 @@ object Project {
   }
 }
 
-case class Project(name: String, category: String, githubRepo: String, val pullRequests: List[PullRequest] = Nil) {
+case class Project(name: String, category: String, githubRepo: String, val pullRequests: List[PullRequest] = Nil, val issues: List[Issue] = Nil) {
 
 }
